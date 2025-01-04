@@ -6,6 +6,15 @@
 #include "media.h"
 
 
+//Create a structure to hold the weather report
+struct Report
+{   float temperature, windspeed, windDirection, hightTemp, lowTemp;
+    int humidity, pressure, visibility;
+    std::string conditions, city, icon;
+    std::time_t sunrise, sunset, currentTime;
+
+};
+
 
 
 using json = nlohmann::json;
@@ -18,7 +27,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* use
 }
 //================================================================================================
 //                          Method to Get New Weather Report
-void UpdateWeather()    
+void UpdateWeather(Report &currentreport)    //send the struct by reference to update it
 {
 CURL* curl;
     CURLcode res;
@@ -46,107 +55,96 @@ CURL* curl;
                 json data = json::parse(readBuffer);
                 std::cout << "Raw JSON Response: " << data.dump(4) << std::endl;
 
-                // Extract temperature
+             // ⁡⁣⁢⁣Extract temperature⁡
                 if (data.contains("main") && data["main"].contains("temp")) {
-                    float temperature = data["main"]["temp"].get<float>();
+                    currentreport.temperature = data["main"]["temp"].get<float>();
 
-                    std::cout << "Temperature: " << temperature << "\u00B0F" << std::endl;
+                    //std::cout << "Temperature: " << temperature << "\u00B0F" << std::endl;
                 } else {
                     std::cerr << "Temperature data not found in the response." << std::endl;
                 }
 
-                // Extract weather condition
-                if (data.contains("weather") && data["weather"].is_array() && !data["weather"].empty()) {
-                    std::string condition = data["weather"][0]["description"].get<std::string>();
-                    std::cout << "Condition: " << condition << std::endl;
+                // ⁡⁣⁢⁡⁣⁢⁣Extract weather condition⁡
+               if (data.contains("weather") && data["weather"].is_array() && !data["weather"].empty()) 
+                {
+                    currentreport.conditions = data["weather"][0]["description"].get<std::string>();
                 } else {
                     std::cerr << "Weather condition not found in the response." << std::endl;
                 }
-                // Extract humidity
+                // ⁡⁣⁢⁣Ex⁡⁣⁢⁣tract humidity⁡
                 if (data.contains("main") && data["main"].contains("humidity")) {
-                    int humidity = data["main"]["humidity"].get<int>();
-                    std::cout << "Humidity: " << humidity << "%" << std::endl;
+                    currentreport.humidity = data["main"]["humidity"].get<int>();
+                    
                 } else {
                     std::cerr << "Humidity data not found in the response." << std::endl;
                 }
-                // Extract wind speed
+                // ⁡⁣⁢⁣Extract wind speed⁡
                 if (data.contains("wind") && data["wind"].contains("speed")) {
-                    float windSpeed = data["wind"]["speed"].get<float>();
-                    std::cout << "Wind Speed: " << windSpeed << " mph" << std::endl;
+                    currentreport.windspeed = data["wind"]["speed"].get<float>();
                 } else {
                     std::cerr << "Wind speed data not found in the response." << std::endl;
                 }
-                // Extract Wind Direction
+                // ⁡⁣⁢⁣Extract Wind Direction⁡
                 if (data.contains("wind") && data["wind"].contains("deg")) {
-                    float windDegrees = data["wind"]["deg"].get<float>();
-                    std::cout<<"Wind Direction:"<<windDegrees <<" degrees"<<std::endl;
+                    currentreport.windDirection = data["wind"]["deg"].get<float>();
                 }
-                
-
-            
-
-
-                // Extract city name
+                else {
+                    std::cerr << "Wind direction data not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract city name⁡
                 if (data.contains("name")) {
-                    std::string city = data["name"].get<std::string>();
-                    std::cout << "City: " << city << std::endl;
+                    currentreport.city = data["name"].get<std::string>();
                 } else {
                     std::cerr << "City name not found in the response." << std::endl;
                 }
-                // Extract Barometric Pressure
+                // ⁡⁣⁢⁣Extract Barometric Pressure⁡
                 if (data.contains("main") && data["main"].contains("pressure")) {
-                    int pressure = data["main"]["pressure"].get<int>();
-                    std::cout << "Pressure: " << pressure << " hPa" << std::endl;
+                    currentreport.pressure= data["main"]["pressure"].get<int>();
                 } else {
                     std::cerr << "Pressure data not found in the response." << std::endl;
                 }
-                // Extract visibility
+                // ⁡⁣⁢⁣Extract visibility⁡
                 if (data.contains("visibility")) {
-                    int visibility = data["visibility"].get<int>();
-                    std::cout << "Visibility: " << visibility << " meters" << std::endl;
+                    currentreport.visibility = data["visibility"].get<int>();
                 } else {
                     std::cerr << "Visibility data not found in the response." << std::endl;
                 }
-                // Extract sunrise time
+                // ⁡⁣⁢⁣Extract sunrise time⁡
                 if (data.contains("sys") && data["sys"].contains("sunrise")) {
                     int sunrise = data["sys"]["sunrise"].get<int>();
-                    std::time_t sunriseTime = sunrise;
-                    std::cout << "Sunrise Time: " << std::asctime(std::localtime(&sunriseTime));
+                    currentreport.sunrise = sunrise;
+                    //std::cout << "Sunrise Time: " << std::asctime(std::localtime(&sunriseTime));
                 } else {
                     std::cerr << "Sunrise time not found in the response." << std::endl;
                 }
-                // Extract sunset time
+                // ⁡⁣⁢⁣Extract sunset time⁡
                 if (data.contains("sys") && data["sys"].contains("sunset")) {
                     int sunset = data["sys"]["sunset"].get<int>();
-                    std::time_t sunsetTime = sunset;
-                    std::cout << "Sunset Time: " << std::asctime(std::localtime(&sunsetTime));
+                    currentreport.sunset = sunset;
+                    //std::cout << "Sunset Time: " << std::asctime(std::localtime(&sunsetTime));
                 } else {
                     std::cerr << "Sunset time not found in the response." << std::endl;
                 }
-                //extract current time
+                // ⁡⁣⁢⁣Extract Current Time⁡
                 if (data.contains("dt")) {
                     int currentTime = data["dt"].get<int>();
-                    std::time_t time = currentTime;
-                    std::cout << "Current Time: " << std::asctime(std::localtime(&time));
+                    currentreport.currentTime = currentTime;
+                    //std::cout << "Current Time: " << std::asctime(std::localtime(&time));
                 } else {
                     std::cerr << "Current time not found in the response." << std::endl;
                 }
-                //extract high and low temperatures
+                //⁡⁣⁢⁣extract high and low temperatures⁡
                 if (data.contains("main") && data["main"].contains("temp_max") && data["main"].contains("temp_min")) {
-                    float highTemp = data["main"]["temp_max"].get<float>();
-                    float lowTemp = data["main"]["temp_min"].get<float>();
-                    std::cout << "High Temperature: " << highTemp << "\u00B0F" << std::endl;
-                    std::cout << "Low Temperature: " << lowTemp << "\u00B0F" << std::endl;
+                    currentreport.hightTemp = data["main"]["temp_max"].get<float>();
+                    currentreport.lowTemp= data["main"]["temp_min"].get<float>();
+                    //std::cout << "High Temperature: " << highTemp << "\u00B0F" << std::endl;
+                    //std::cout << "Low Temperature: " << lowTemp << "\u00B0F" << std::endl;
                 } else {
                     std::cerr << "High and low temperatures not found in the response." << std::endl;
                 }
-                //extract weather icon
-                if (data.contains("weather") && data["weather"].is_array() && !data["weather"].empty()) {
-                    std::string icon = data["weather"][0]["icon"].get<std::string>();
-                    std::cout << "Weather Icon: " << icon << std::endl;
-                } else {
-                    std::cerr << "Weather icon not found in the response." << std::endl;
-                }
+                
+
+
 
             } catch (const json::exception& e) {
                 std::cerr << "JSON Parsing Error: " << e.what() << std::endl;
@@ -169,7 +167,7 @@ int main()
 
     Timer weatherRefreshTimer;
     Timer animation;
-
+    Report currentReport;
 
 
 
@@ -186,7 +184,7 @@ int main()
 
     
     weatherRefreshTimer.start();
-    UpdateWeather();    //get the first report before heading into the display loop
+    UpdateWeather(currentReport);    //get the first report before heading into the display loop
 
     while(!WindowShouldClose())
     {
@@ -198,7 +196,7 @@ int main()
             weatherRefreshTimer.reset();
             weatherRefreshTimer.start();
             std::cout<<"************  update weather *****************\n";
-
+            //UpdateWeather(currentReport);
 
         }
 
