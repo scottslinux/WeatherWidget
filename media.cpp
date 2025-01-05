@@ -2,8 +2,12 @@
 #include "raylib.h"
 
 //  Initiaialize Static Variables to Zero State
-//Texture2D media::bug={0};
-Font media::digital7;
+
+Font media::digital7={0};
+Font media::digital7Dot={0};
+Font media::digital7AdvDot={0};
+
+Texture2D media::Gizmo={0}; //frame holding the weather report
 
 //testing git
 
@@ -20,12 +24,17 @@ media::~media()
 }
 //====================================
 
+
 void media::loadMediaFiles()    //static function (see .h)to load media
 {
     //Load all of the image files into static variables
-    //bug=LoadTexture("resources/Roach sprites.png");
-    digital7=LoadFontEx("resources/digital7.ttf",20,0,0);
+    
+    digital7 = LoadFontEx("resources/digital-7.ttf", 80, NULL, 0);
+   
+    digital7Dot=LoadFontEx("resources/7segment.ttf",80,NULL,0);
+    digital7AdvDot=LoadFontEx("resources/advanced_dot_digital-7.ttf",80,NULL,0);
 
+    Gizmo=LoadTexture("resources/console3.png");
 
 
     return;
@@ -38,6 +47,8 @@ void media::unloadMediaFiles()
     // Free up all of the resources
     //UnloadTexture(bug);
     UnloadFont(digital7);
+    UnloadFont(digital7Dot);
+    UnloadFont(digital7AdvDot);
     
 
 

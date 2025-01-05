@@ -10,9 +10,12 @@ class media
 
 public:
 
-    //static Texture2D bug;
+
     static Font digital7;
-    
+    static Font digital7Dot;
+    static Font digital7AdvDot;
+
+    static Texture2D Gizmo;
 
 
 

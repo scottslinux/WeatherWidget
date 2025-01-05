@@ -34,7 +34,11 @@ CURL* curl;
     std::string readBuffer;
 
     // Replace YOUR_API_KEY with your OpenWeatherMap API key
-    std::string url = "https://api.openweathermap.org/data/2.5/weather?lat=33.5888062&lon=-111.9493601&appid=fd8117695692f303ce69211de853a0f2&units=imperial";
+    //std::string url = "https://api.openweathermap.org/data/2.5/weather?lat=33.5888062&lon=-111.9493601&appid=fd8117695692f303ce69211de853a0f2&units=imperial";
+
+    std::string url = "https://api.openweathermap.org/data/3.0/onecall?lat=33.5888062&lon=-111.9493601&appid=56901c1a22b73ad304bbdbe85a2d4c9b&units=imperial";
+    
+
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -161,6 +165,144 @@ CURL* curl;
 
 }
 //==========================================================================================
+//weather routine re-wrtten for onecall api
+void UpdateWeatherOneCall(Report &currentreport)    //send the struct by reference to update it
+{
+CURL* curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    // Replace YOUR_API_KEY with your OpenWeatherMap API key
+    //std::   string url = "https://api.openweathermap.org/data/2.5/onecall?lat=33.5888062&lon=-111.9493601&exclude=minutely,hourly,daily&appid=fd8117695692f303ce69211de853a0f2&units=imperial"; //exclude=minutely,hourly,daily for current weather only                
+    std::string url = "https://api.openweathermap.org/data/3.0/onecall?lat=33.5888062&lon=-111.9493601&exclude=hourly&appid=56901c1a22b73ad304bbdbe85a2d4c9b&units=imperial";
+    
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+
+
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+        // Perform the request
+        res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            std::cerr << "cURL Error: " << curl_easy_strerror(res) << std::endl;
+        } else {
+            try {
+                // Parse JSON response using nlohmann/json
+                json data = json::parse(readBuffer);
+                std::cout << "Raw JSON Response: " << data.dump(4) << std::endl;
+
+             // ⁡⁣⁢⁣Extract temperature⁡
+                if (data.contains("current") && data["current"].contains("temp")) {
+                    currentreport.temperature = data["current"]["temp"].get<float>();
+
+                    //std::cout << "Temperature: " << temperature << "\u00B0F" << std::endl;
+                } else {
+                    std::cerr << "Temperature data not found in the response." << std::endl;
+                }
+
+                // ⁡⁣⁢⁡⁣⁢⁣Extract weather condition⁡
+               if (data.contains("current") && data["current"].contains("weather") && data["current"]["weather"].is_array() && !data["current"]["weather"].empty()) 
+                {
+                    currentreport.conditions = data["current"]["weather"][0]["description"].get<std::string>();
+                } else {
+                    std::cerr << "Weather condition not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Ex⁡⁣⁢⁣tract humidity⁡
+                if (data.contains("current") && data["current"].contains("humidity")) {
+                    currentreport.humidity = data["current"]["humidity"].get<int>();
+                    
+                } else {
+                    std::cerr << "Humidity data not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract wind speed⁡
+                if (data.contains("current") && data["current"].contains("wind_speed")) {
+                    currentreport.windspeed = data["current"]["wind_speed"].get<float>();
+                } else {
+                    std::cerr << "Wind speed data not found in  the response." << std::endl;    
+                }
+                // ⁡⁣⁢⁣Extract Wind Direction⁡
+                if (data.contains("current") && data["current"].contains("wind_deg")) {
+                    currentreport.windDirection = data["current"]["wind_deg"].get<float>();
+                }
+                else {
+                    std::cerr << "Wind direction data not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract city name⁡
+                if (data.contains("timezone")) {
+                    currentreport.city = data["timezone"].get<std::string>();
+                } else {
+                    std::cerr << "City name not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract Barometric Pressure⁡
+                if (data.contains("current") && data["current"].contains("pressure")) {
+                    currentreport.pressure= data["current"]["pressure"].get<int>();
+                } else {
+                    std::cerr << "Pressure data not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract visibility⁡
+                if (data.contains("current") && data["current"].contains("visibility")) {
+                    currentreport.visibility = data["current"]["visibility"].get<int>();
+                } else {
+                    std::cerr << "Visibility data not found in the response." << std::endl;
+                }
+                // ⁡⁣⁢⁣Extract sunrise time⁡
+                if (data.contains("current") && data["current"].contains("sunrise")) {
+                    int sunrise = data["current"]["sunrise"].get<int>();
+                    currentreport.sunrise = sunrise;
+                    //std::cout << "Sunrise Time: " << std::asctime(std::localtime(&sunriseTime));
+                } else {
+                    std::cerr << "Sunrise time not found in the response." << std::endl;
+                }   
+                // ⁡⁣⁢⁣Extract sunset time⁡
+                if (data.contains("current") && data["current"].contains("sunset")) {
+                    int sunset = data["current"]["sunset"].get<int>();
+                    currentreport.sunset = sunset;
+                    //std::cout << "Sunset Time: " << std::asctime(std::localtime(&sunsetTime));
+                } else {
+                    std::cerr << "Sunset time not found in the response." << std::endl;
+                }   
+                // ⁡⁣⁢⁣Extract Current Time⁡
+                if (data.contains("current") && data["current"].contains("dt")) {
+                    int currentTime = data["current"]["dt"].get<int>();
+                    currentreport.currentTime = currentTime;
+                    //std::cout << "Current Time: " << std::asctime(std::localtime(&time));
+                } else {
+                    std::cerr << "Current time not found in the response." << std::endl;
+                }   
+                //⁡⁣⁢⁣extract high and low temperatures⁡
+                if (data.contains("daily") && data["daily"].is_array() && !data["daily"].empty() && data["daily"][0].contains("temp") && data["daily"][0]["temp"].contains("max") && data["daily"][0]["temp"].contains("min")) {
+                    currentreport.hightTemp = data["daily"][0]["temp"]["max"].get<float>();
+                    currentreport.lowTemp= data["daily"][0]["temp"]["min"].get<float>();
+
+                    std::cout << "High Temperature: " << currentreport.hightTemp << "\u00B0F" << std::endl;
+                    std::cout << "Low Temperature: " << currentreport.lowTemp << "\u00B0F" << std::endl;
+                    //std::cout << "High Temperature: " << highTemp << "\u00B0F" << std::endl;
+                    //std::cout << "Low Temperature: " << lowTemp << "\u00B0F" << std::endl;
+                } else {
+                    std::cerr << "High and low temperatures not found in the response." << std::endl;
+                }   
+
+            } catch (const json::exception& e) {
+                std::cerr << "JSON Parsing Error: " << e.what() << std::endl;
+            }
+        }
+
+        curl_easy_cleanup(curl);
+    }
+
+    curl_global_cleanup();
+
+}
+
+
+//==========================================================================================
+//                          Main Program
 
 int main() 
 {
@@ -174,36 +316,58 @@ int main()
 
 
     
-    media::loadMediaFiles();    //get the good stuff!
     
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
-    //SetConfigFlags(FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
 
-    InitWindow(600,1200,"Weather");
+    InitWindow(1200,1200,"Weather");
     SetTargetFPS(30);   //30 fps should be good for a widget
+    SetWindowPosition(3900,1400);
 
-    
+    media::loadMediaFiles();
     weatherRefreshTimer.start();
-    UpdateWeather(currentReport);    //get the first report before heading into the display loop
+    UpdateWeatherOneCall(currentReport);    //get the first report before heading into the display loop
+
+
+    //Font myfont=LoadFontEx("resources/7segment.ttf", 60, 0, 250);
 
     while(!WindowShouldClose())
     {
-        std::cout<<"Entering Reporting loop...1st update\n";
 
-        if(weatherRefreshTimer.elapsed()>6)
+        if(weatherRefreshTimer.elapsed()>60)  //timer in seconds
         {
-            //UpdateWeather();
             weatherRefreshTimer.reset();
             weatherRefreshTimer.start();
             std::cout<<"************  update weather *****************\n";
-            //UpdateWeather(currentReport);
+            //​‌‌‌⁡⁢⁢⁡⁣⁣⁢𝗨𝗽𝗱𝗮𝘁𝗲𝗪𝗲𝗮𝘁𝗵𝗲𝗿(𝗰𝘂𝗿𝗿𝗲𝗻𝘁𝗥𝗲𝗽𝗼𝗿𝘁);⁡
 
         }
 
         BeginDrawing();
             ClearBackground(Color{0,0,0,0});   //clear the screen
             //weather window display routines  
-            DrawText("Weather Widget",10,10,80,WHITE);  
+           
+            
+            //DrawTextPro(media::digital7Dot,"Testing",{100,200},{0,0},0,50,5,ORANGE);
+            //DrawTextPro(media::digital7,"Testing",{200,500},{0,0},0,50,5,Color{255,205,55,255});
+            
+
+            //DrawTexture(media::Gizmo,100,100,WHITE);
+
+            Rectangle source={0,0,media::Gizmo.width,media::Gizmo.height};
+            Rectangle dest={0,0,media::Gizmo.width/3,media::Gizmo.height/3};
+            DrawTexturePro(media::Gizmo,source,dest,{0,0},0,WHITE);
+
+            DrawTextPro(media::digital7,"Temperature: \n\nWind:\n\nConditions:",{500,300},{0,0},0,50,5,Color{100,255,105,rand()%75+180});
+            DrawTextPro(media::digital7,"15:25",{640,160},{0,0},0,40,5,YELLOW);
+            DrawTextPro(media::digital7,"sunrise:\n\n\n\nsunset:",{260,620},{0,0},0,30,5,Color{100,255,105,rand()%75+180});
+            DrawTextPro(media::digital7,"===>",{360,200},{0,0},45,30,5,Color{242,255,0,rand()%75+180});
+
+            //draw solid elipse
+            DrawEllipse(1130,425,10,5,Color{242,255,0,rand()%100});
+            DrawEllipse(1130,355,20,7,Color{242,255,0,rand()%100});
+            DrawEllipse(800,180,60,7,Color{242,255,0,rand()%100});
+
 
 
         EndDrawing();
