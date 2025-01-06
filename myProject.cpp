@@ -1,6 +1,7 @@
 #include <iostream>
 #include <curl/curl.h>
 #include <string>
+#include <sstream>
 #include "json.hpp" // Include nlohmann/json header
 #include "timer.h"
 #include "media.h"
@@ -334,12 +335,13 @@ int main()
     while(!WindowShouldClose())
     {
 
-        if(weatherRefreshTimer.elapsed()>60)  //timer in seconds
+        if(weatherRefreshTimer.elapsed()>3600)  //timer in seconds
         {
             weatherRefreshTimer.reset();
             weatherRefreshTimer.start();
             std::cout<<"************  update weather *****************\n";
-            //​‌‌‌⁡⁢⁢⁡⁣⁣⁢𝗨𝗽𝗱𝗮𝘁𝗲𝗪𝗲𝗮𝘁𝗵𝗲𝗿(𝗰𝘂𝗿𝗿𝗲𝗻𝘁𝗥𝗲𝗽𝗼𝗿𝘁);⁡
+            UpdateWeatherOneCall(currentReport);
+            std::cout<<"************  weather updated *****************\n";
 
         }
 
@@ -348,25 +350,52 @@ int main()
             //weather window display routines  
            
             
-            //DrawTextPro(media::digital7Dot,"Testing",{100,200},{0,0},0,50,5,ORANGE);
-            //DrawTextPro(media::digital7,"Testing",{200,500},{0,0},0,50,5,Color{255,205,55,255});
-            
-
-            //DrawTexture(media::Gizmo,100,100,WHITE);
+           
 
             Rectangle source={0,0,media::Gizmo.width,media::Gizmo.height};
             Rectangle dest={0,0,media::Gizmo.width/3,media::Gizmo.height/3};
             DrawTexturePro(media::Gizmo,source,dest,{0,0},0,WHITE);
 
-            DrawTextPro(media::digital7,"Temperature: \n\nWind:\n\nConditions:",{500,300},{0,0},0,50,5,Color{100,255,105,rand()%75+180});
-            DrawTextPro(media::digital7,"15:25",{640,160},{0,0},0,40,5,YELLOW);
-            DrawTextPro(media::digital7,"sunrise:\n\n\n\nsunset:",{260,620},{0,0},0,30,5,Color{100,255,105,rand()%75+180});
-            DrawTextPro(media::digital7,"===>",{360,200},{0,0},45,30,5,Color{242,255,0,rand()%75+180});
+            //DrawTextPro(media::digital7,"Temperature:",{500,300},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            currentReport.temperature=std::round(currentReport.temperature);
+            std::stringstream ss;
+            ss<<currentReport.temperature;
+            DrawTextPro(media::digital7,ss.str().c_str(),{640,335},{0,0},0,150,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawRing({813,335},15,18,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+
+            currentReport.hightTemp=std::round(currentReport.hightTemp);
+            currentReport.lowTemp=std::round(currentReport.lowTemp);
+            //clear ss
+            ss.str(std::string());
+            ss<<currentReport.conditions;
+            DrawTextPro(media::digital7,ss.str().c_str(),{483,500},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            //clear ss
+            ss.str(std::string());
+            ss<<"high\n"<<currentReport.hightTemp<<"\nlow\n"<<currentReport.lowTemp;
+            DrawTextPro(media::digital7,ss.str().c_str(),{873,330},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+
+            
+            
+            
+            
+            //DrawTextPro(media::digital7,std::to_string(currentReport.temperature).c_str(),{640,380},{0,0},0,120,5,Color{100,255,105,rand()%75+180});
+            //display current time
+            std::tm* localTime = std::localtime(&currentReport.currentTime);
+            const char* timeCString = std::asctime(localTime);
+
+            DrawTextPro(media::digital7,timeCString,{510,275},{0,0},0,35,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,"sunrise:\n\n\n\nsunset:",{260,620},{0,0},0,30,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,"===>",{360,200},{0,0},45,30,5,Color{242,255,0,static_cast<unsigned char>(rand()%75+180)});
 
             //draw solid elipse
-            DrawEllipse(1130,425,10,5,Color{242,255,0,rand()%100});
-            DrawEllipse(1130,355,20,7,Color{242,255,0,rand()%100});
-            DrawEllipse(800,180,60,7,Color{242,255,0,rand()%100});
+            DrawEllipse(1130,425,10,5,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
+            DrawEllipse(1130,355,20,7,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
+            DrawEllipse(800,180,60,7,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
+
+            int x=GetMouseX();
+            int y=GetMouseY();
+            DrawText(std::to_string(x).c_str(),10,10,40,GREEN);
+            DrawText(std::to_string(y).c_str(),10,60,40,GREEN);
 
 
 
