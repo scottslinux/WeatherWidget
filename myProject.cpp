@@ -368,15 +368,24 @@ int main()
             //clear ss
             ss.str(std::string());
             ss<<currentReport.conditions;
-            DrawTextPro(media::digital7,ss.str().c_str(),{483,500},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{483,580},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
             //clear ss
             ss.str(std::string());
             ss<<"high\n"<<currentReport.hightTemp<<"\nlow\n"<<currentReport.lowTemp;
             DrawTextPro(media::digital7,ss.str().c_str(),{873,330},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-
-            
-            
-            
+            //clear ss
+            ss.str(std::string());
+            ss<<"humidity\n  "<<currentReport.humidity<<"%";
+            DrawTextPro(media::digital7,ss.str().c_str(),{533,483},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            //clear ss
+            ss.str(std::string());
+            ss<<"  wind\n"<<currentReport.windspeed<<" mph";
+            DrawTextPro(media::digital7,ss.str().c_str(),{270,640},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            //clear ss
+            ss.str(std::string());
+            ss<<currentReport.windDirection;
+            DrawTextPro(media::digital7,ss.str().c_str(),{294,730},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawRing({370,733},5,8,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)}); 
             
             //DrawTextPro(media::digital7,std::to_string(currentReport.temperature).c_str(),{640,380},{0,0},0,120,5,Color{100,255,105,rand()%75+180});
             //display current time
@@ -384,8 +393,7 @@ int main()
             const char* timeCString = std::asctime(localTime);
 
             DrawTextPro(media::digital7,timeCString,{510,275},{0,0},0,35,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-            DrawTextPro(media::digital7,"sunrise:\n\n\n\nsunset:",{260,620},{0,0},0,30,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-            DrawTextPro(media::digital7,"===>",{360,200},{0,0},45,30,5,Color{242,255,0,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,"===>",{360,238},{0,0},currentReport.windDirection-90+(rand()%3+-1),30,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
 
             //draw solid elipse
             DrawEllipse(1130,425,10,5,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
