@@ -16,7 +16,7 @@ struct Report
 
 };
 
-
+const float IMAGE_SCALE=0.75f;
 
 using json = nlohmann::json;
 //================================================================================================
@@ -312,26 +312,21 @@ int main()
     Timer animation;
     Report currentReport;
 
-
-
-
-
-    
     
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
     SetConfigFlags(FLAG_WINDOW_UNDECORATED);
 
-    InitWindow(1200,1200,"Weather");
+    InitWindow(1200*IMAGE_SCALE,1200*IMAGE_SCALE,"Weather");
     SetTargetFPS(30);   //30 fps should be good for a widget
-    SetWindowPosition(3900,1400);
+    SetWindowPosition(GetMonitorWidth(0)-1200*IMAGE_SCALE,GetMonitorHeight(0)-1200*IMAGE_SCALE);
 
     media::loadMediaFiles();
     weatherRefreshTimer.start();
     UpdateWeatherOneCall(currentReport);    //get the first report before heading into the display loop
 
-
-    //Font myfont=LoadFontEx("resources/7segment.ttf", 60, 0, 250);
-
+// Load the render texture
+    RenderTexture2D canvas = LoadRenderTexture(1200, 1200);
+    
     while(!WindowShouldClose())
     {
 
@@ -346,12 +341,13 @@ int main()
         }
 
         BeginDrawing();
-            ClearBackground(Color{0,0,0,0});   //clear the screen
-            //weather window display routines  
-           
-            
-           
 
+
+            ClearBackground(Color{0,0,0,0});   //clear the screen
+           
+           
+            BeginTextureMode(canvas);
+            ClearBackground(Color{0,0,0,0});   //clear the screen
             Rectangle source={0,0,media::Gizmo.width,media::Gizmo.height};
             Rectangle dest={0,0,media::Gizmo.width/3,media::Gizmo.height/3};
             DrawTexturePro(media::Gizmo,source,dest,{0,0},0,WHITE);
@@ -405,10 +401,11 @@ int main()
             DrawText(std::to_string(x).c_str(),10,10,40,GREEN);
             DrawText(std::to_string(y).c_str(),10,60,40,GREEN);
 
+            EndTextureMode();
 
-
+            DrawTexturePro(canvas.texture,{0,0,canvas.texture.width,-canvas.texture.height},{0,0,1200*IMAGE_SCALE,1200*IMAGE_SCALE}, {0,0},0,WHITE);
         EndDrawing();
     }
-    
+    media::unloadMediaFiles();
     return 0;
 }
