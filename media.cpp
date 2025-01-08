@@ -34,7 +34,7 @@ void media::loadMediaFiles()    //static function (see .h)to load media
     digital7Dot=LoadFontEx("resources/7segment.ttf",80,NULL,0);
     digital7AdvDot=LoadFontEx("resources/advanced_dot_digital-7.ttf",80,NULL,0);
 
-    Gizmo=LoadTexture("/resources/console3.png");
+    Gizmo=LoadTexture("resources/console3.png");
 
 
     return;

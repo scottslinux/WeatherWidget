@@ -5,6 +5,7 @@
 #include "json.hpp" // Include nlohmann/json header
 #include "timer.h"
 #include "media.h"
+#include <chrono>
 
 
 //Create a structure to hold the weather report
@@ -16,7 +17,9 @@ struct Report
 
 };
 
+int counter=0;
 const float IMAGE_SCALE=0.75f;
+const int REFRESH_INTERVAL=3600;  //refresh weather every hour
 
 using json = nlohmann::json;
 //================================================================================================
@@ -196,7 +199,7 @@ CURL* curl;
             try {
                 // Parse JSON response using nlohmann/json
                 json data = json::parse(readBuffer);
-                std::cout << "Raw JSON Response: " << data.dump(4) << std::endl;
+                //std::cout << "Raw JSON Response: " << data.dump(4) << std::endl;
 
              // ⁡⁣⁢⁣Extract temperature⁡
                 if (data.contains("current") && data["current"].contains("temp")) {
@@ -311,6 +314,9 @@ int main()
     Timer weatherRefreshTimer;
     Timer animation;
     Report currentReport;
+    std::chrono::steady_clock::time_point lastreportTime;
+    std::chrono::steady_clock::time_point currentTime;
+    //when checking will see if currenttime-lastreporttime>3600 seconds
 
     
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT);
@@ -323,6 +329,7 @@ int main()
     media::loadMediaFiles();
     weatherRefreshTimer.start();
     UpdateWeatherOneCall(currentReport);    //get the first report before heading into the display loop
+    lastreportTime=std::chrono::steady_clock::now();
 
 // Load the render texture
     RenderTexture2D canvas = LoadRenderTexture(1200, 1200);
@@ -330,12 +337,14 @@ int main()
     while(!WindowShouldClose())
     {
 
-        if(weatherRefreshTimer.elapsed()>3600)  //timer in seconds
+       
+        currentTime=std::chrono::steady_clock::now();
+        if(currentTime-lastreportTime>std::chrono::seconds(REFRESH_INTERVAL))  //timer in seconds
         {
-            weatherRefreshTimer.reset();
-            weatherRefreshTimer.start();
+            lastreportTime=currentTime;
             std::cout<<"************  update weather *****************\n";
             UpdateWeatherOneCall(currentReport);
+            std::cout<<++counter<<std::endl;
             std::cout<<"************  weather updated *****************\n";
 
         }
@@ -375,7 +384,7 @@ int main()
             DrawTextPro(media::digital7,ss.str().c_str(),{533,483},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
             //clear ss
             ss.str(std::string());
-            ss<<"  wind\n"<<currentReport.windspeed<<" mph";
+            ss<<"  wind\n"<<std::round(currentReport.windspeed)<<" mph";
             DrawTextPro(media::digital7,ss.str().c_str(),{270,640},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
             //clear ss
             ss.str(std::string());
