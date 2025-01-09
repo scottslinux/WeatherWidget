@@ -19,7 +19,7 @@ struct Report
 
 int counter=0;
 const float IMAGE_SCALE=0.75f;
-const int REFRESH_INTERVAL=3600;  //refresh weather every hour
+const int REFRESH_INTERVAL=1800;  //refresh weather every 30 minutes
 
 using json = nlohmann::json;
 //================================================================================================
@@ -325,8 +325,11 @@ int main()
     InitWindow(1200*IMAGE_SCALE,1200*IMAGE_SCALE,"Weather");
     SetTargetFPS(30);   //30 fps should be good for a widget
     SetWindowPosition(GetMonitorWidth(0)-1200*IMAGE_SCALE,GetMonitorHeight(0)-1200*IMAGE_SCALE);
+    InitAudioDevice();
+
 
     media::loadMediaFiles();
+
     weatherRefreshTimer.start();
     UpdateWeatherOneCall(currentReport);    //get the first report before heading into the display loop
     lastreportTime=std::chrono::steady_clock::now();
@@ -339,15 +342,15 @@ int main()
 
        
         currentTime=std::chrono::steady_clock::now();
+    
         if(currentTime-lastreportTime>std::chrono::seconds(REFRESH_INTERVAL))  //timer in seconds
         {
             lastreportTime=currentTime;
-            std::cout<<"************  update weather *****************\n";
             UpdateWeatherOneCall(currentReport);
-            std::cout<<++counter<<std::endl;
-            std::cout<<"************  weather updated *****************\n";
 
         }
+
+
 
         BeginDrawing();
 
@@ -361,58 +364,86 @@ int main()
             Rectangle dest={0,0,media::Gizmo.width/3,media::Gizmo.height/3};
             DrawTexturePro(media::Gizmo,source,dest,{0,0},0,WHITE);
 
-            //DrawTextPro(media::digital7,"Temperature:",{500,300},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            //DrawTextPro(media::digital7,"Temperature:",{500,300},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             currentReport.temperature=std::round(currentReport.temperature);
             std::stringstream ss;
             ss<<currentReport.temperature;
-            DrawTextPro(media::digital7,ss.str().c_str(),{640,335},{0,0},0,150,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-            DrawRing({813,335},15,18,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{640,335},{0,0},0,150,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
+            DrawRing({813,335},15,18,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
 
             currentReport.hightTemp=std::round(currentReport.hightTemp);
             currentReport.lowTemp=std::round(currentReport.lowTemp);
             //clear ss
             ss.str(std::string());
             ss<<currentReport.conditions;
-            DrawTextPro(media::digital7,ss.str().c_str(),{483,580},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{483,580},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             //clear ss
             ss.str(std::string());
             ss<<"high\n"<<currentReport.hightTemp<<"\nlow\n"<<currentReport.lowTemp;
-            DrawTextPro(media::digital7,ss.str().c_str(),{873,330},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{873,330},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             //clear ss
             ss.str(std::string());
             ss<<"humidity\n  "<<currentReport.humidity<<"%";
-            DrawTextPro(media::digital7,ss.str().c_str(),{533,483},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{533,483},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             //clear ss
             ss.str(std::string());
             ss<<"  wind\n"<<std::round(currentReport.windspeed)<<" mph";
-            DrawTextPro(media::digital7,ss.str().c_str(),{270,640},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,ss.str().c_str(),{270,640},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             //clear ss
             ss.str(std::string());
             ss<<currentReport.windDirection;
-            DrawTextPro(media::digital7,ss.str().c_str(),{294,730},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-            DrawRing({370,733},5,8,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)}); 
+            DrawTextPro(media::digital7,ss.str().c_str(),{294,730},{0,0},0,40,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
+            DrawRing({370,733},5,8,0,360,0,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)}); 
             
-            //DrawTextPro(media::digital7,std::to_string(currentReport.temperature).c_str(),{640,380},{0,0},0,120,5,Color{100,255,105,rand()%75+180});
+            //DrawTextPro(media::digital7,std::to_string(currentReport.temperature).c_str(),{640,380},{0,0},0,120,5,Color{100,255,105,rand()%35+220});
             //display current time
             std::tm* localTime = std::localtime(&currentReport.currentTime);
             const char* timeCString = std::asctime(localTime);
 
-            DrawTextPro(media::digital7,timeCString,{510,275},{0,0},0,35,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
-            DrawTextPro(media::digital7,"===>",{360,238},{0,0},currentReport.windDirection-90+(rand()%3+-1),30,5,Color{100,255,105,static_cast<unsigned char>(rand()%75+180)});
+            DrawTextPro(media::digital7,timeCString,{510,275},{0,0},0,35,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
+            DrawTextPro(media::digital7,"===>",{360,238},{0,0},currentReport.windDirection-90+(rand()%3+-1),30,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
 
             //draw solid elipse
             DrawEllipse(1130,425,10,5,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
             DrawEllipse(1130,355,20,7,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
             DrawEllipse(800,180,60,7,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
 
-            int x=GetMouseX();
+//          Numerate the mouse position for building console
+/*          int x=GetMouseX();
             int y=GetMouseY();
             DrawText(std::to_string(x).c_str(),10,10,40,GREEN);
             DrawText(std::to_string(y).c_str(),10,60,40,GREEN);
+*/
+            //489,578
 
             EndTextureMode();
 
             DrawTexturePro(canvas.texture,{0,0,canvas.texture.width,-canvas.texture.height},{0,0,1200*IMAGE_SCALE,1200*IMAGE_SCALE}, {0,0},0,WHITE);
+
+
+//          draw the refresh button
+            DrawCircle(487,578,10,Color{50,255,105,static_cast<unsigned char>(rand()%150+105)});
+
+            //Refresh on demand
+            Vector2 mousePos = GetMousePosition();
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                std::cout<<"mouse clicked\n";
+                if(CheckCollisionPointCircle(mousePos,{487,578},20))
+                {
+                    lastreportTime=currentTime;
+                    UpdateWeatherOneCall(currentReport);     
+                    std::cout<<"refreshed\n";  
+                    
+                    if(!IsSoundPlaying(media::beep))
+                    {
+                        PlaySound(media::beep);
+                    }
+                    
+
+                 }
+            }
+
         EndDrawing();
     }
     media::unloadMediaFiles();

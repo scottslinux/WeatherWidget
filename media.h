@@ -16,6 +16,7 @@ public:
     static Font digital7AdvDot;
 
     static Texture2D Gizmo;
+    static Sound beep;
 
 
 
