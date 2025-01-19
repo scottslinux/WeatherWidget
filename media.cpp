@@ -8,6 +8,7 @@ Font media::digital7Dot={0};
 Font media::digital7AdvDot={0};
 
 Texture2D media::Gizmo={0}; //frame holding the weather report
+Texture2D media::Pip={0};
 Sound media::beep={0};   //sound to play when refreshing the weather report
 
 //testing git
@@ -36,6 +37,7 @@ void media::loadMediaFiles()    //static function (see .h)to load media
     digital7AdvDot=LoadFontEx("resources/advanced_dot_digital-7.ttf",80,NULL,0);
 
     Gizmo=LoadTexture("resources/console3.png");
+    Pip=LoadTexture("resources/pip.png");
     // Load sound file
     beep = LoadSound("resources/beep.wav");
     if (beep.frameCount == 0) {
@@ -56,6 +58,7 @@ void media::unloadMediaFiles()
     UnloadFont(digital7Dot);
     UnloadFont(digital7AdvDot);
     UnloadTexture(Gizmo);
+    UnloadTexture(Pip);
     UnloadSound(beep);
     
 

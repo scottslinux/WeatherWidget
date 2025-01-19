@@ -324,7 +324,7 @@ int main()
 
     InitWindow(1200*IMAGE_SCALE,1200*IMAGE_SCALE,"Weather");
     SetTargetFPS(30);   //30 fps should be good for a widget
-    SetWindowPosition(GetMonitorWidth(0)-1200*IMAGE_SCALE,GetMonitorHeight(0)-1200*IMAGE_SCALE);
+    SetWindowPosition(6000-1200*IMAGE_SCALE,GetMonitorHeight(0)-1200*IMAGE_SCALE);
     InitAudioDevice();
 
 
@@ -363,6 +363,9 @@ int main()
             Rectangle source={0,0,media::Gizmo.width,media::Gizmo.height};
             Rectangle dest={0,0,media::Gizmo.width/3,media::Gizmo.height/3};
             DrawTexturePro(media::Gizmo,source,dest,{0,0},0,WHITE);
+            Rectangle source2={0,0,media::Pip.width,media::Pip.height};
+            Rectangle dest2={700,425,media::Pip.width/8,media::Pip.height/8};
+            DrawTexturePro(media::Pip,source2,dest2,{0,0},0,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
 
             //DrawTextPro(media::digital7,"Temperature:",{500,300},{0,0},0,50,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
             currentReport.temperature=std::round(currentReport.temperature);
@@ -401,7 +404,7 @@ int main()
             const char* timeCString = std::asctime(localTime);
 
             DrawTextPro(media::digital7,timeCString,{510,275},{0,0},0,35,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
-            DrawTextPro(media::digital7,"===>",{360,238},{0,0},currentReport.windDirection-90+(rand()%3+-1),30,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
+            DrawTextPro(media::digital7,"===>",{360,230},{0,0},currentReport.windDirection-90+(rand()%3+-1),30,5,Color{100,255,105,static_cast<unsigned char>(rand()%35+220)});
 
             //draw solid elipse
             DrawEllipse(1130,425,10,5,Color{242,255,0,static_cast<unsigned char>(rand()%100)});
